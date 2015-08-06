@@ -2,6 +2,7 @@ package main
 
 import (
     "encoding/json"
+    "fmt"
     "io/ioutil"
     "net/http"
 
@@ -35,7 +36,7 @@ func main() {
         return tempReturn + "\r\n"
     })
 
-    m.Post("/**", func(request *http.Request, params martini.Params) string {
+    m.Post("/**", func(request *http.Request, params martini.Params, response http.ResponseWriter) {
         topic := params["_1"]
 
         body, err := ioutil.ReadAll(request.Body)
@@ -48,10 +49,12 @@ func main() {
             panic("Invalid JSON")
         }
 
+        fmt.Println("Topic: " + topic)
+        fmt.Println("Message: " + string(body))
         // Send message to storage
         // storage.Insert(topic, string(body))
 
-        return "Posting a message to " + topic + "\r\n"
+        response.WriteHeader(http.StatusCreated)
     })
 
     m.Run()
