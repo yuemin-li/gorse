@@ -1,6 +1,8 @@
 package main
 
 import (
+    "encoding/json"
+    "io/ioutil"
     "net/http"
 
     "github.com/go-martini/martini"
@@ -15,9 +17,9 @@ func main() {
 
     m.Handlers()
 
-    m.Get("/**", func(r *http.Request, params martini.Params) string {
+    m.Get("/**", func(request *http.Request, params martini.Params) string {
         topic := params["_1"]
-        marker, marker_present := r.URL.Query()["marker"]
+        marker, marker_present := request.URL.Query()["marker"]
 
         // Get message from storage
         // if marker_present {
@@ -31,6 +33,25 @@ func main() {
             tempReturn += " with marker of " + marker[0]
         }
         return tempReturn + "\r\n"
+    })
+
+    m.Post("/**", func(request *http.Request, params martini.Params) string {
+        topic := params["_1"]
+
+        body, err := ioutil.ReadAll(request.Body)
+        if err != nil {
+            panic("Unable to read body")
+        }
+        var valid_json interface{}
+        err = json.Unmarshal(body, &valid_json)
+        if err != nil {
+            panic("Invalid JSON")
+        }
+
+        // Send message to storage
+        // storage.Insert(topic, string(body))
+
+        return "Posting a message to " + topic + "\r\n"
     })
 
     m.Run()
