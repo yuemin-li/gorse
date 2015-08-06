@@ -18,7 +18,7 @@ func main() {
 
     m.Handlers()
 
-    m.Get("/**", func(request *http.Request, params martini.Params) string {
+    m.Get("/**", func(request *http.Request, params martini.Params, response http.ResponseWriter) string {
         topic := params["_1"]
         marker, marker_present := request.URL.Query()["marker"]
 
@@ -29,11 +29,23 @@ func main() {
         //     storage.Get(topic)
         // }
 
+        // Example return
+        events := make([]map[string]string, 0)
+        event := make(map[string]string)
+        event["property"] = "value"
+        events = append(events, event)
+        jsonString, _ := json.Marshal(events)
+        fmt.Println(string(jsonString))
+
         tempReturn := "Getting messages on " + topic
         if marker_present {
             tempReturn += " with marker of " + marker[0]
         }
-        return tempReturn + "\r\n"
+        fmt.Println(tempReturn)
+        // return tempReturn + "\r\n"
+
+        response.Header()["Content-Type"] = []string{"application/json"}
+        return string(jsonString) + "\r\n"
     })
 
     m.Post("/**", func(request *http.Request, params martini.Params, response http.ResponseWriter) {
