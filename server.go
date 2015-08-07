@@ -9,7 +9,7 @@ import (
     "github.com/dlintw/goconf"
     "github.com/go-martini/martini"
     "github.com/kuwagata/martini-keystone-auth"
-    "github.com/user/gorse-cache-redis"
+    // "github.com/user/gorse-cache-redis"
     // "github.com/user/gorse-storage-kafka"
     // "github.com/user/gorse-storage-redis"
 )
@@ -85,7 +85,7 @@ func main() {
 }
 
 
-func setupAuthHandler(cfg goconf.ConfigFile) martini.Handler {
+func setupAuthHandler(cfg *goconf.ConfigFile) martini.Handler {
     auth_url, _ := cfg.GetString("Auth", "endpoint")
     hostname, _ := cfg.GetString("Cache", "hostname")
     port, _ := cfg.GetString("Cache", "port")
