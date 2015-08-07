@@ -7,8 +7,8 @@ import (
     "net/http"
 
     "github.com/go-martini/martini"
+    "github.com/kuwagata/martini-keystone-auth"
     // "github.com/user/gorse-cache-redis"
-    // "github.com/user/gorse-handler-auth"
     // "github.com/user/gorse-storage-kafka"
     // "github.com/user/gorse-storage-redis"
 )
@@ -16,7 +16,10 @@ import (
 func main() {
     m := martini.Classic()
 
+    auth_handler := setupAuthHandler()
+
     m.Handlers(
+        auth_handler,
         martini.Recovery(),
     )
 
@@ -72,4 +75,15 @@ func main() {
     })
 
     m.Run()
+}
+
+
+func setupAuthHandler() martini.Handler {
+    return auth.Keystone(
+        auth.IdentityValidator{AuthUrl: "https://identity.api.rackspacecloud.com/v2.0/tokens"},
+        auth.Redis{
+            Hostname: "192.168.59.103",
+            Port:     "6379",
+            Password: "",
+            Database: int64(0)})
 }
