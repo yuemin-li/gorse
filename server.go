@@ -6,17 +6,24 @@ import (
     "io/ioutil"
     "net/http"
 
+    "github.com/dlintw/goconf"
     "github.com/go-martini/martini"
     "github.com/kuwagata/martini-keystone-auth"
-    // "github.com/user/gorse-cache-redis"
+    "github.com/user/gorse-cache-redis"
     // "github.com/user/gorse-storage-kafka"
     // "github.com/user/gorse-storage-redis"
 )
 
+
 func main() {
+    cfg, err := goconf.ReadConfigFile("rse.config")
+    if err != nil {
+        panic(err)
+    }
+    
     m := martini.Classic()
 
-    auth_handler := setupAuthHandler()
+    auth_handler := setupAuthHandler(cfg)
 
     m.Handlers(
         auth_handler,
@@ -78,12 +85,17 @@ func main() {
 }
 
 
-func setupAuthHandler() martini.Handler {
+func setupAuthHandler(cfg goconf.ConfigFile) martini.Handler {
+    auth_url, _ := cfg.GetString("Auth", "endpoint")
+    hostname, _ := cfg.GetString("Cache", "hostname")
+    port, _ := cfg.GetString("Cache", "port")
+    password, _ := cfg.GetString("Cache", "password")
+
     return auth.Keystone(
-        auth.IdentityValidator{AuthUrl: "https://identity.api.rackspacecloud.com/v2.0/tokens"},
+        auth.IdentityValidator{AuthUrl: auth_url},
         auth.Redis{
-            Hostname: "192.168.59.103",
-            Port:     "6379",
-            Password: "",
+            Hostname: hostname,
+            Port:     port,
+            Password: password,
             Database: int64(0)})
 }
